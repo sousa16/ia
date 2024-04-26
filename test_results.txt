@@ -1,0 +1,74 @@
+Difference found for test_1-9/test-06.txt:
+Expected output:
+FB	FD	VE
+BD	LH	BE
+VD	FE	FC
+
+Actual output:
+
+Difference found for test_1-9/test-04.txt:
+Expected output:
+FB	VB	VE
+BD	BE	LV
+FC	FC	FC
+
+Actual output:
+
+Difference found for test_1-9/test-09.txt:
+Expected output:
+FD	VE	FB	VB	VE
+VB	BE	LV	FC	LV
+FC	BD	BC	BB	BE
+FD	VC	FD	BE	LV
+FD	LH	LH	VC	FC
+
+Actual output:
+
+Difference found for test_1-9/test-03.txt:
+Expected output:
+VB	VE
+FC	FC
+
+Actual output:
+
+Difference found for test_1-9/test-05.txt:
+Expected output:
+FB	VB	VE
+VD	BE	LV
+FD	VC	FC
+
+Actual output:
+
+Difference found for test_1-9/test-07.txt:
+Expected output:
+FD	BB	BB	FE
+FD	BE	FC	FB
+VB	BC	BB	BE
+FC	FD	VC	FC
+
+Actual output:
+
+Difference found for test_1-9/test-01.txt:
+Expected output:
+VB	VE
+FC	FC
+
+Actual output:
+
+Difference found for test_1-9/test-02.txt:
+Expected output:
+VB	VE
+VD	VC
+
+Actual output:
+
+Difference found for test_1-9/test-08.txt:
+Expected output:
+VB	FE	VB	LH	FE
+LV	FB	BD	LH	VE
+BD	VC	BD	FE	LV
+VD	BB	BC	VE	LV
+FD	VC	FD	VC	FC
+
+Actual output:
+
