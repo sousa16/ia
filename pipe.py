@@ -235,25 +235,25 @@ class Board:
     def actions_for_bifurcation_piece(self, row, col, surrounding_placed_pieces):
         """Devolve as ações possíveis para uma peça de bifurcação."""
 
-        if row == 0 or surrounding_placed_pieces[0] in ["FC", "FE", "FD", "BC", "VC", "VD", "LH"]:
+        if row == 0 or surrounding_placed_pieces[0] in {"FC", "FE", "FD", "BC", "VC", "VD", "LH"}:
             return ("BB",)
-        if row == self.size - 1 or surrounding_placed_pieces[1] in ["FB", "FE", "FD", "BB", "VB", "VE", "LH"]:
+        if row == self.size - 1 or surrounding_placed_pieces[1] in {"FB", "FE", "FD", "BB", "VB", "VE", "LH"}:
             return ("BC",)
-        if col == 0 or surrounding_placed_pieces[2] in ["FC", "FB", "FE", "BE", "VC", "VE", "LV"]:
+        if col == 0 or surrounding_placed_pieces[2] in {"FC", "FB", "FE", "BE", "VC", "VE", "LV"}:
             return ("BD",)
-        if col == self.size - 1 or surrounding_placed_pieces[3] in ["FC", "FB", "FD", "BD", "VB", "VD", "LV"]:
+        if col == self.size - 1 or surrounding_placed_pieces[3] in {"FC", "FB", "FD", "BD", "VB", "VD", "LV"}:
             return ("BE",)
 
         actions = ["BC", "BB", "BE", "BD"]
 
         # Check for surrounding pieces that have a connection
-        if surrounding_placed_pieces[0] in ["FB", "BB", "BE", "BD", "VB", "VE", "LV"]:
+        if surrounding_placed_pieces[0] in {"FB", "BB", "BE", "BD", "VB", "VE", "LV"}:
             actions.remove("BB")
-        if surrounding_placed_pieces[1] in ["FC", "BC", "BE", "BD", "VC", "VD", "LV"]:
+        if surrounding_placed_pieces[1] in {"FC", "BC", "BE", "BD", "VC", "VD", "LV"}:
             actions.remove("BC")
-        if surrounding_placed_pieces[2] in ["FD", "BC", "BB", "BD", "VB", "VD", "LH"]:
+        if surrounding_placed_pieces[2] in {"FD", "BC", "BB", "BD", "VB", "VD", "LH"}:
             actions.remove("BD")
-        if surrounding_placed_pieces[3] in ["FE", "BC", "BB", "BE", "VC", "VE", "LH"]:
+        if surrounding_placed_pieces[3] in {"FE", "BC", "BB", "BE", "VC", "VE", "LH"}:
             actions.remove("BE")
 
         return tuple(actions)
