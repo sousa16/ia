@@ -297,31 +297,29 @@ class Board:
 
     def actions_for_straight_piece(self, row, col, surrounding_placed_pieces):
         """Devolve as ações possíveis para uma peça reta."""
-        actions = ["LH", "LV"]
+        actions = []
 
         def check_LV(row, col, surrounding_placed_pieces):
             condition1 = row == 0 or row == self.size - 1
-            condition2 = surrounding_placed_pieces[2] in [
-                "FD", "BC", "BB", "BD", "VB", "VD", "LH"]
-            condition3 = surrounding_placed_pieces[3] in [
-                "FE", "BC", "BB", "BE", "VC", "VE", "LH"]
-
+            condition2 = surrounding_placed_pieces[2] in {
+                "FD", "BC", "BB", "BD", "VB", "VD", "LH"}
+            condition3 = surrounding_placed_pieces[3] in {
+                "FE", "BC", "BB", "BE", "VC", "VE", "LH"}
             return condition1 or condition2 or condition3
 
         def check_LH(row, col, surrounding_placed_pieces):
             condition1 = col == 0 or col == self.size - 1
-            condition2 = surrounding_placed_pieces[0] in [
-                "FB", "BB", "BE", "BD", "VB", "VE", "LV"]
-            condition3 = surrounding_placed_pieces[1] in [
-                "FC", "BC", "BE", "BD", "VC", "VD", "LV"]
-
+            condition2 = surrounding_placed_pieces[0] in {
+                "FB", "BB", "BE", "BD", "VB", "VE", "LV"}
+            condition3 = surrounding_placed_pieces[1] in {
+                "FC", "BC", "BE", "BD", "VC", "VD", "LV"}
             return condition1 or condition2 or condition3
 
-        if check_LV(row, col, surrounding_placed_pieces):
-            actions.remove("LV")
+        if not check_LV(row, col, surrounding_placed_pieces):
+            actions.append("LV")
 
-        if check_LH(row, col, surrounding_placed_pieces):
-            actions.remove("LH")
+        if not check_LH(row, col, surrounding_placed_pieces):
+            actions.append("LH")
 
         return tuple(actions)
 
