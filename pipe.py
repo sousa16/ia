@@ -114,11 +114,10 @@ class Board:
 
         """
         print("Placed piece", piece, "at", row, col)
-        print("Remaining cells:", new_board.remaining_cells)
-        print("Placed cells:", new_board.placed_cells)
-        print("Possible values:", new_board.possible_values)
-        print("------------------------------------------------")
-        """
+        # print("Remaining cells:", new_board.remaining_cells)
+        # print("Placed cells:", new_board.placed_cells)
+        print("Possible values for cell:", new_board.possible_values[row][col])
+        print("-------------------------------------------------")"""
 
         return new_board
 
@@ -290,29 +289,15 @@ class Board:
 
     def actions_for_straight_piece(self, row, col, surrounding_placed_pieces):
         """Devolve as ações possíveis para uma peça reta."""
-        actions = []
+        actions = ["LV", "LH"]
 
-        def check_LV(row, col, surrounding_placed_pieces):
-            condition1 = row == 0 or row == self.size - 1
-            condition2 = surrounding_placed_pieces[2] in {
-                "FD", "BC", "BB", "BD", "VB", "VD", "LH"}
-            condition3 = surrounding_placed_pieces[3] in {
-                "FE", "BC", "BB", "BE", "VC", "VE", "LH"}
-            return condition1 or condition2 or condition3
+        if row == 0 or row == self.size - 1 or surrounding_placed_pieces[2] in {
+                "FD", "BC", "BB", "BD", "VB", "VD", "LH"} or surrounding_placed_pieces[3] in {"FE", "BC", "BB", "BE", "VC", "VE", "LH"} or surrounding_placed_pieces[0] in {"FC", "FE", "FD", "BC", "VC", "VD", "LH"} or surrounding_placed_pieces[1] in {"FB", "FE", "FD", "BB", "VB", "VE", "LH"}:
+            actions.remove("LV")
 
-        def check_LH(row, col, surrounding_placed_pieces):
-            condition1 = col == 0 or col == self.size - 1
-            condition2 = surrounding_placed_pieces[0] in {
-                "FB", "BB", "BE", "BD", "VB", "VE", "LV"}
-            condition3 = surrounding_placed_pieces[1] in {
-                "FC", "BC", "BE", "BD", "VC", "VD", "LV"}
-            return condition1 or condition2 or condition3
-
-        if not check_LV(row, col, surrounding_placed_pieces):
-            actions.append("LV")
-
-        if not check_LH(row, col, surrounding_placed_pieces):
-            actions.append("LH")
+        if col == 0 or col == self.size - 1 or surrounding_placed_pieces[0] in {
+                "FB", "BB", "BE", "BD", "VB", "VE", "LV"} or surrounding_placed_pieces[1] in {"FC", "BC", "BE", "BD", "VC", "VD", "LV"} or surrounding_placed_pieces[2] in {"FC", "FB", "FE", "BE", "VC", "VE", "LV"} or surrounding_placed_pieces[3] in {"FC", "FB", "FD", "BD", "VB", "VD", "LV"}:
+            actions.remove("LH")
 
         return tuple(actions)
 
