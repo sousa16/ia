@@ -115,9 +115,10 @@ class Board:
         """
         print("Placed piece", piece, "at", row, col)
         # print("Remaining cells:", new_board.remaining_cells)
-        # print("Placed cells:", new_board.placed_cells)
+        print("Placed cells:", new_board.placed_cells)
         print("Possible values for cell:", new_board.possible_values[row][col])
-        print("-------------------------------------------------")"""
+        print("-------------------------------------------------")
+        """
 
         return new_board
 
@@ -199,13 +200,13 @@ class Board:
 
     def actions_for_closing_piece(self, row, col, surrounding_placed_pieces):
         """Devolve as ações possíveis para uma peça de fecho."""
-        actions = ["FC", "FB", "FE", "FD"]
 
         invalid_pieces_0 = {"BB", "BE", "BD", "VB", "VE", "LV"}
         invalid_pieces_1 = {"BC", "BE", "BD", "VC", "VD", "LV"}
         invalid_pieces_2 = {"BC", "BB", "BD", "VB", "VD", "LH"}
         invalid_pieces_3 = {"BC", "BB", "BE", "VC", "VE", "LH"}
 
+        # Check for surrounding pieces that have a connection
         if surrounding_placed_pieces[0] in invalid_pieces_0:
             return ("FC",)
         if surrounding_placed_pieces[1] in invalid_pieces_1:
@@ -215,18 +216,21 @@ class Board:
         if surrounding_placed_pieces[3] in invalid_pieces_3:
             return ("FD",)
 
-        invalid_pieces_0 = {"FB", "FE", "FD", "BC", "VC", "VD", "LH"}
-        invalid_pieces_1 = {"FC", "FE", "FD", "BB", "VB", "VE", "LH"}
-        invalid_pieces_2 = {"FC", "FB", "FD", "BE", "VC", "VE", "LV"}
-        invalid_pieces_3 = {"FC", "FB", "FE", "BD", "VB", "VD", "LV"}
+        actions = ["FC", "FB", "FE", "FD"]
 
-        if row == 0 or surrounding_placed_pieces[0] in invalid_pieces_0:
+        invalid_pieces_4 = {"FC", "FB", "FE", "FD", "BC", "VC", "VD", "LH"}
+        invalid_pieces_5 = {"FC", "FB", "FE", "FD", "BB", "VB", "VE", "LH"}
+        invalid_pieces_6 = {"FC", "FB", "FE", "FD", "BE", "VC", "VE", "LV"}
+        invalid_pieces_7 = {"FC", "FB", "FE", "FD", "BD", "VB", "VD", "LV"}
+
+        # Check for surrounding pieces that don't have a connection
+        if row == 0 or surrounding_placed_pieces[0] in invalid_pieces_4:
             actions.remove("FC")
-        if row == self.size - 1 or surrounding_placed_pieces[1] in invalid_pieces_1:
+        if row == self.size - 1 or surrounding_placed_pieces[1] in invalid_pieces_5:
             actions.remove("FB")
-        if col == 0 or surrounding_placed_pieces[2] in invalid_pieces_2:
+        if col == 0 or surrounding_placed_pieces[2] in invalid_pieces_6:
             actions.remove("FE")
-        if col == self.size - 1 or surrounding_placed_pieces[3] in invalid_pieces_3:
+        if col == self.size - 1 or surrounding_placed_pieces[3] in invalid_pieces_7:
             actions.remove("FD")
 
         return tuple(actions)
@@ -234,6 +238,7 @@ class Board:
     def actions_for_bifurcation_piece(self, row, col, surrounding_placed_pieces):
         """Devolve as ações possíveis para uma peça de bifurcação."""
 
+        # Check for surrounding pieces that don't have a connection
         if row == 0 or surrounding_placed_pieces[0] in {"FC", "FE", "FD", "BC", "VC", "VD", "LH"}:
             return ("BB",)
         if row == self.size - 1 or surrounding_placed_pieces[1] in {"FB", "FE", "FD", "BB", "VB", "VE", "LH"}:
@@ -284,6 +289,11 @@ class Board:
         elif col == self.size - 1 or surrounding_placed_pieces[3] in invalid_pieces_3 or surrounding_placed_pieces[2] in invalid_pieces_6:
             actions.remove("VB") if "VB" in actions else None
             actions.remove("VD") if "VD" in actions else None
+        
+
+        
+        
+        
 
         return tuple(actions)
 
