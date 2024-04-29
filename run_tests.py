@@ -36,7 +36,7 @@ def run_test(input_file, expected_output_file):
 
 
 # Get a list of all input files in the directory
-input_files = glob.glob('test_1-9/test*.txt')
+input_files = glob.glob('tests_1-9/test*.txt')
 
 for input_file in input_files:
     # Construct the name of the corresponding output file

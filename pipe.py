@@ -50,20 +50,20 @@ class Board:
 
         # Calculate possible_values, which will use actions_for_cell
         for row in range(self.size):
-            row_possibilities = ()
+            row_possibilities = []
             for col in range(self.size):
                 actions = self.actions_for_cell(row, col)
 
-                if len(actions) == 0:
+                if not actions:
                     self.invalid = True
                     return self
                 else:
                     # Append a tuple (row, col, actions) to temp_cells
                     temp_cells.append((row, col, actions))
 
-                row_possibilities += (actions,)
+                row_possibilities.append(actions)
 
-            self.possible_values += (row_possibilities,)
+            self.possible_values.append(tuple(row_possibilities))
 
         # Sort temp_cells by the length of actions
         temp_cells.sort(key=lambda x: len(x[2]))
@@ -99,9 +99,9 @@ class Board:
     def place_piece(self, row: int, col: int, piece: str):
         """Coloca a peça na posição especificada e devolve um novo tabuleiro."""
 
-        new_row = self.cells[row][:col] + (piece,) + self.cells[row][col + 1:]
-        new_cells = self.cells[:row] + (new_row,) + self.cells[row + 1:]
-        new_board = Board(new_cells)
+        new_cells = [list(row) for row in self.cells]
+        new_cells[row][col] = piece
+        new_board = Board(tuple(map(tuple, new_cells)))
 
         new_board.remaining_cells = self.remaining_cells[1:]
         new_board.placed_cells = self.placed_cells + [(row, col)]
@@ -113,11 +113,11 @@ class Board:
             new_board.possible_values[cell[0]][cell[1]]))
 
         """ Prints used for debugging
-        print("Placed piece", piece, "at", row, col)
-        print("Remaining cells:", new_board.remaining_cells)
-        print("Placed cells:", new_board.placed_cells)
-        print("Possible values:", new_board.possible_values)
-        print("------------------------------------------------")"""
+            print("Placed piece", piece, "at", row, col)
+            print("Remaining cells:", new_board.remaining_cells)
+            print("Placed cells:", new_board.placed_cells)
+            print("Possible values:", new_board.possible_values)
+            print("------------------------------------------------")"""
 
         return new_board
 
@@ -126,26 +126,26 @@ class Board:
         Atualiza a linha e coluna afetadas."""
 
         # Recalculate for affected row and column
-        new_possible_values = ()
+        new_possible_values = []
         for r in range(self.size):
-            row_possibilities = ()
+            row_possibilities = []
             for c in range(self.size):
                 old_possibilities = self.get_possibilities_for_cell(r, c)
-                if (r != row and c != col) or len(old_possibilities) == 0:
-                    row_possibilities += (old_possibilities,)
+                if (r != row and c != col) or not old_possibilities:
+                    row_possibilities.append(old_possibilities)
                     continue
 
-                possibilities = tuple(self.actions_for_cell(r, c))
+                possibilities = self.actions_for_cell(r, c)
 
-                if (r != row or c != col) and len(possibilities) == 0:
+                if (r != row or c != col) and not possibilities:
                     self.invalid = True
                     return
 
-                row_possibilities += (possibilities,)
+                row_possibilities.append(possibilities)
 
-            new_possible_values += (row_possibilities,)
+            new_possible_values.append(tuple(row_possibilities))
 
-        self.possible_values = new_possible_values
+        self.possible_values = tuple(new_possible_values)
 
     def get_remaining_cells_count(self):
         """Devolve o número de células que ainda não foram preenchidas."""
@@ -166,16 +166,16 @@ class Board:
         """top, bottom, left, right"""
         surrounding_placed_pieces = [None, None, None, None]
 
-        if row != 0 and (row - 1, col) in self.placed_cells:
+        if row > 0 and self.get_value(row - 1, col) is not None:
             surrounding_placed_pieces[0] = self.get_value(row - 1, col)
 
-        if row != self.size - 1 and (row + 1, col) in self.placed_cells:
+        if row < self.size - 1 and self.get_value(row + 1, col) is not None:
             surrounding_placed_pieces[1] = self.get_value(row + 1, col)
 
-        if col != 0 and (row, col - 1) in self.placed_cells:
+        if col > 0 and self.get_value(row, col - 1) is not None:
             surrounding_placed_pieces[2] = self.get_value(row, col - 1)
 
-        if col != self.size - 1 and (row, col + 1) in self.placed_cells:
+        if col < self.size - 1 and self.get_value(row, col + 1) is not None:
             surrounding_placed_pieces[3] = self.get_value(row, col + 1)
 
         return surrounding_placed_pieces
@@ -199,104 +199,52 @@ class Board:
 
     def actions_for_closing_piece(self, row, col, surrounding_placed_pieces):
         """Devolve as ações possíveis para uma peça de fecho."""
-        actions = ["FC", "FB", "FE", "FD"]
+        actions = []
 
-        if surrounding_placed_pieces[0] in ["BB", "BE", "BD", "VB", "VE", "LV"]:
-            return ("FC",)
-        if surrounding_placed_pieces[1] in ["BC", "BE", "BD", "VC", "VD", "LV"]:
-            return ("FB",)
-        if surrounding_placed_pieces[2] in ["BC", "BB", "BD", "VB", "VD", "LH"]:
-            return ("FE",)
-        if surrounding_placed_pieces[3] in ["BC", "BB", "BE", "VC", "VE", "LH"]:
-            return ("FD",)
-
-        if row == 0 or surrounding_placed_pieces[0] in ["FB", "FE", "FD", "BC", "VC", "VD", "LH"]:
-            actions.remove("FC")
-        if row == self.size - 1 or surrounding_placed_pieces[1] in ["FC", "FE", "FD", "BB", "VB", "VE", "LH"]:
-            actions.remove("FB")
-
-        if col == 0 or surrounding_placed_pieces[2] in ["FC", "FB", "FD", "BE", "VC", "VE", "LV"]:
-            actions.remove("FE")
-        if col == self.size - 1 or surrounding_placed_pieces[3] in ["FC", "FB", "FE", "BD", "VB", "VD", "LV"]:
-            actions.remove("FD")
+        if row > 0 and surrounding_placed_pieces[0] not in ["BB", "BE", "BD", "VB", "VE", "LV", "FB", "FE", "FD", "BC", "VC", "VD", "LH"]:
+            actions.append("FC")
+        if row < self.size - 1 and surrounding_placed_pieces[1] not in ["BC", "BE", "BD", "VC", "VD", "LV", "FC", "FE", "FD", "BB", "VB", "VE", "LH"]:
+            actions.append("FB")
+        if col > 0 and surrounding_placed_pieces[2] not in ["BC", "BB", "BD", "VB", "VD", "LH", "FC", "FB", "FD", "BE", "VC", "VE", "LV"]:
+            actions.append("FE")
+        if col < self.size - 1 and surrounding_placed_pieces[3] not in ["BC", "BB", "BE", "VC", "VE", "LH", "FC", "FB", "FE", "BD", "VB", "VD", "LV"]:
+            actions.append("FD")
 
         return tuple(actions)
 
     def actions_for_bifurcation_piece(self, row, col, surrounding_placed_pieces):
         """Devolve as ações possíveis para uma peça de bifurcação."""
+        actions = []
 
-        if row == 0 or surrounding_placed_pieces[0] in ["FC", "FE", "FD", "BC", "VC", "VD", "LH"]:
-            return ("BB",)
-        if row == self.size - 1 or surrounding_placed_pieces[1] in ["FB", "FE", "FD", "BB", "VB", "VE", "LH"]:
-            return ("BC",)
-        if col == 0 or surrounding_placed_pieces[2] in ["FC", "FB", "FE", "BE", "VC", "VE", "LV"]:
-            return ("BD",)
-        if col == self.size - 1 or surrounding_placed_pieces[3] in ["FC", "FB", "FD", "BD", "VB", "VD", "LV"]:
-            return ("BE",)
-
-        actions = ["BC", "BB", "BE", "BD"]
-
-        # Check for surrounding pieces that have a connection
-        if surrounding_placed_pieces[0] in ["FB", "BB", "BE", "BD", "VB", "VE", "LV"]:
-            actions.remove("BB")
-        if surrounding_placed_pieces[1] in ["FC", "BC", "BE", "BD", "VC", "VD", "LV"]:
-            actions.remove("BC")
-        if surrounding_placed_pieces[2] in ["FD", "BC", "BB", "BD", "VB", "VD", "LH"]:
-            actions.remove("BD")
-        if surrounding_placed_pieces[3] in ["FE", "BC", "BB", "BE", "VC", "VE", "LH"]:
-            actions.remove("BE")
+        if row > 0 and surrounding_placed_pieces[0] not in ["FC", "FE", "FD", "BC", "VC", "VD", "LH"]:
+            actions.append("BB")
+        if row < self.size - 1 and surrounding_placed_pieces[1] not in ["FB", "FE", "FD", "BB", "VB", "VE", "LH"]:
+            actions.append("BC")
+        if col > 0 and surrounding_placed_pieces[2] not in ["FC", "FB", "FE", "BE", "VC", "VE", "LV"]:
+            actions.append("BD")
+        if col < self.size - 1 and surrounding_placed_pieces[3] not in ["FC", "FB", "FD", "BD", "VB", "VD", "LV"]:
+            actions.append("BE")
 
         return tuple(actions)
 
     def actions_for_corner_piece(self, row, col, surrounding_placed_pieces):
         """Devolve as ações possíveis para uma peça de canto."""
-        actions = ["VC", "VB", "VE", "VD"]
+        actions = []
 
-        if row == 0:
-            actions.remove("VC") if "VC" in actions else None
-            actions.remove("VD") if "VD" in actions else None
-        elif row == self.size - 1:
-            actions.remove("VB") if "VB" in actions else None
-            actions.remove("VE") if "VE" in actions else None
-
-        if col == 0:
-            actions.remove("VE") if "VE" in actions else None
-            actions.remove("VC") if "VC" in actions else None
-        elif col == self.size - 1:
-            actions.remove("VB") if "VB" in actions else None
-            actions.remove("VD") if "VD" in actions else None
-
-        if surrounding_placed_pieces[0] in ["FC", "FE", "FD", "BC", "VC", "VD", "LH"]:
-            actions.remove("VC") if "VC" in actions else None
-            actions.remove("VD") if "VD" in actions else None
-        if surrounding_placed_pieces[1] in ["FB", "FE", "FD", "BB", "VB", "VE", "LH"]:
-            actions.remove("VB") if "VB" in actions else None
-            actions.remove("VE") if "VE" in actions else None
-        if surrounding_placed_pieces[2] in ["FC", "FB", "FE", "BE", "VC", "VE", "LV"]:
-            actions.remove("VE") if "VE" in actions else None
-            actions.remove("VC") if "VC" in actions else None
-        if surrounding_placed_pieces[3] in ["FC", "FB", "FD", "BD", "VB", "VD", "LV"]:
-            actions.remove("VD") if "VD" in actions else None
-            actions.remove("VB") if "VB" in actions else None
-
-        if surrounding_placed_pieces[0] in ["FB", "BB", "BE", "BD", "VB", "VE", "LV"]:
-            actions.remove("VB") if "VB" in actions else None
-            actions.remove("VE") if "VE" in actions else None
-        if surrounding_placed_pieces[1] in ["FC", "BC", "BE", "BD", "VC", "VD", "LV"]:
-            actions.remove("VC") if "VC" in actions else None
-            actions.remove("VD") if "VD" in actions else None
-        if surrounding_placed_pieces[2] in ["FD", "BC", "BB", "BD", "VB", "VD", "LH"]:
-            actions.remove("VD") if "VD" in actions else None
-            actions.remove("VB") if "VB" in actions else None
-        if surrounding_placed_pieces[3] in ["FE", "BC", "BB", "BE", "VC", "VE", "LH"]:
-            actions.remove("VE") if "VE" in actions else None
-            actions.remove("VC") if "VC" in actions else None
+        if row > 0 and col > 0 and surrounding_placed_pieces[0] not in ["FC", "FE", "FD", "BC", "VC", "VD", "LH"]:
+            actions.append("VB")
+        if row < self.size - 1 and col > 0 and surrounding_placed_pieces[1] not in ["FB", "FE", "FD", "BB", "VB", "VE", "LH"]:
+            actions.append("VC")
+        if row < self.size - 1 and col < self.size - 1 and surrounding_placed_pieces[2] not in ["FC", "FB", "FE", "BE", "VC", "VE", "LV"]:
+            actions.append("VE")
+        if row > 0 and col < self.size - 1 and surrounding_placed_pieces[3] not in ["FC", "FB", "FD", "BD", "VB", "VD", "LV"]:
+            actions.append("VD")
 
         return tuple(actions)
 
     def actions_for_straight_piece(self, row, col, surrounding_placed_pieces):
         """Devolve as ações possíveis para uma peça reta."""
-        actions = ["LH", "LV"]
+        actions = []
 
         def check_LV(row, col, surrounding_placed_pieces):
             condition1 = row == 0 or row == self.size - 1
@@ -304,7 +252,6 @@ class Board:
                 "FD", "BC", "BB", "BD", "VB", "VD", "LH"]
             condition3 = surrounding_placed_pieces[3] in [
                 "FE", "BC", "BB", "BE", "VC", "VE", "LH"]
-
             return condition1 or condition2 or condition3
 
         def check_LH(row, col, surrounding_placed_pieces):
@@ -313,14 +260,13 @@ class Board:
                 "FB", "BB", "BE", "BD", "VB", "VE", "LV"]
             condition3 = surrounding_placed_pieces[1] in [
                 "FC", "BC", "BE", "BD", "VC", "VD", "LV"]
-
             return condition1 or condition2 or condition3
 
-        if check_LV(row, col, surrounding_placed_pieces):
-            actions.remove("LV")
+        if not check_LV(row, col, surrounding_placed_pieces):
+            actions.append("LV")
 
-        if check_LH(row, col, surrounding_placed_pieces):
-            actions.remove("LH")
+        if not check_LH(row, col, surrounding_placed_pieces):
+            actions.append("LH")
 
         return tuple(actions)
 
