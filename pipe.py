@@ -279,21 +279,17 @@ class Board:
         if row == 0 or surrounding_placed_pieces[0] in invalid_pieces_0 or surrounding_placed_pieces[1] in invalid_pieces_5:
             actions.remove("VC") if "VC" in actions else None
             actions.remove("VD") if "VD" in actions else None
-        elif row == self.size - 1 or surrounding_placed_pieces[1] in invalid_pieces_1 or surrounding_placed_pieces[0] in invalid_pieces_4:
+        if row == self.size - 1 or surrounding_placed_pieces[1] in invalid_pieces_1 or surrounding_placed_pieces[0] in invalid_pieces_4:
             actions.remove("VB") if "VB" in actions else None
             actions.remove("VE") if "VE" in actions else None
 
         if col == 0 or surrounding_placed_pieces[2] in invalid_pieces_2 or surrounding_placed_pieces[3] in invalid_pieces_7:
             actions.remove("VE") if "VE" in actions else None
             actions.remove("VC") if "VC" in actions else None
-        elif col == self.size - 1 or surrounding_placed_pieces[3] in invalid_pieces_3 or surrounding_placed_pieces[2] in invalid_pieces_6:
+
+        if col == self.size - 1 or surrounding_placed_pieces[3] in invalid_pieces_3 or surrounding_placed_pieces[2] in invalid_pieces_6:
             actions.remove("VB") if "VB" in actions else None
             actions.remove("VD") if "VD" in actions else None
-        
-
-        
-        
-        
 
         return tuple(actions)
 
