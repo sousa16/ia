@@ -102,7 +102,7 @@ def flatten(seqs):
 # ______________________________________________________________________________
 # argmin and argmax
 
-identity = lambda x: x
+def identity(x): return x
 
 
 def argmin_random_tie(seq, key=identity):
@@ -456,10 +456,12 @@ def print_table(table, header=None, sep='   ', numfmt='{}'):
     table = [[numfmt.format(x) if isnumber(x) else x for x in row]
              for row in table]
 
-    sizes = list(map(lambda seq: max(map(len, seq)), list(zip(*[map(str, row) for row in table]))))
+    sizes = list(map(lambda seq: max(map(len, seq)), list(
+        zip(*[map(str, row) for row in table]))))
 
     for row in table:
-        print(sep.join(getattr(str(x), j)(size) for (j, size, x) in zip(justs, sizes, row)))
+        print(sep.join(getattr(str(x), j)(size)
+              for (j, size, x) in zip(justs, sizes, row)))
 
 
 def open_data(name, mode='r'):
