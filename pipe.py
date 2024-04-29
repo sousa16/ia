@@ -202,23 +202,32 @@ class Board:
         """Devolve as ações possíveis para uma peça de fecho."""
         actions = ["FC", "FB", "FE", "FD"]
 
-        if surrounding_placed_pieces[0] in ["BB", "BE", "BD", "VB", "VE", "LV"]:
+        invalid_pieces_0 = {"BB", "BE", "BD", "VB", "VE", "LV"}
+        invalid_pieces_1 = {"BC", "BE", "BD", "VC", "VD", "LV"}
+        invalid_pieces_2 = {"BC", "BB", "BD", "VB", "VD", "LH"}
+        invalid_pieces_3 = {"BC", "BB", "BE", "VC", "VE", "LH"}
+
+        if surrounding_placed_pieces[0] in invalid_pieces_0:
             return ("FC",)
-        if surrounding_placed_pieces[1] in ["BC", "BE", "BD", "VC", "VD", "LV"]:
+        if surrounding_placed_pieces[1] in invalid_pieces_1:
             return ("FB",)
-        if surrounding_placed_pieces[2] in ["BC", "BB", "BD", "VB", "VD", "LH"]:
+        if surrounding_placed_pieces[2] in invalid_pieces_2:
             return ("FE",)
-        if surrounding_placed_pieces[3] in ["BC", "BB", "BE", "VC", "VE", "LH"]:
+        if surrounding_placed_pieces[3] in invalid_pieces_3:
             return ("FD",)
 
-        if row == 0 or surrounding_placed_pieces[0] in ["FB", "FE", "FD", "BC", "VC", "VD", "LH"]:
-            actions.remove("FC")
-        if row == self.size - 1 or surrounding_placed_pieces[1] in ["FC", "FE", "FD", "BB", "VB", "VE", "LH"]:
-            actions.remove("FB")
+        invalid_pieces_0 = {"FB", "FE", "FD", "BC", "VC", "VD", "LH"}
+        invalid_pieces_1 = {"FC", "FE", "FD", "BB", "VB", "VE", "LH"}
+        invalid_pieces_2 = {"FC", "FB", "FD", "BE", "VC", "VE", "LV"}
+        invalid_pieces_3 = {"FC", "FB", "FE", "BD", "VB", "VD", "LV"}
 
-        if col == 0 or surrounding_placed_pieces[2] in ["FC", "FB", "FD", "BE", "VC", "VE", "LV"]:
+        if row == 0 or surrounding_placed_pieces[0] in invalid_pieces_0:
+            actions.remove("FC")
+        if row == self.size - 1 or surrounding_placed_pieces[1] in invalid_pieces_1:
+            actions.remove("FB")
+        if col == 0 or surrounding_placed_pieces[2] in invalid_pieces_2:
             actions.remove("FE")
-        if col == self.size - 1 or surrounding_placed_pieces[3] in ["FC", "FB", "FE", "BD", "VB", "VD", "LV"]:
+        if col == self.size - 1 or surrounding_placed_pieces[3] in invalid_pieces_3:
             actions.remove("FD")
 
         return tuple(actions)
