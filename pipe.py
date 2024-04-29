@@ -262,45 +262,29 @@ class Board:
         """Devolve as ações possíveis para uma peça de canto."""
         actions = ["VC", "VB", "VE", "VD"]
 
-        if row == 0:
+        invalid_pieces_0 = {"FC", "FE", "FD", "BC", "VC", "VD", "LH"}
+        invalid_pieces_1 = {"FB", "FE", "FD", "BB", "VB", "VE", "LH"}
+        invalid_pieces_2 = {"FC", "FB", "FE", "BE", "VC", "VE", "LV"}
+        invalid_pieces_3 = {"FC", "FB", "FD", "BD", "VB", "VD", "LV"}
+
+        invalid_pieces_4 = {"FB", "BB", "BE", "BD", "VB", "VE", "LV"}
+        invalid_pieces_5 = {"FC", "BC", "BE", "BD", "VC", "VD", "LV"}
+        invalid_pieces_6 = {"FD", "BC", "BB", "BD", "VB", "VD", "LH"}
+        invalid_pieces_7 = {"FE", "BC", "BB", "BE", "VC", "VE", "LH"}
+
+        if row == 0 or surrounding_placed_pieces[0] in invalid_pieces_0 or surrounding_placed_pieces[1] in invalid_pieces_5:
             actions.remove("VC") if "VC" in actions else None
             actions.remove("VD") if "VD" in actions else None
-        elif row == self.size - 1:
+        elif row == self.size - 1 or surrounding_placed_pieces[1] in invalid_pieces_1 or surrounding_placed_pieces[0] in invalid_pieces_4:
             actions.remove("VB") if "VB" in actions else None
             actions.remove("VE") if "VE" in actions else None
 
-        if col == 0:
+        if col == 0 or surrounding_placed_pieces[2] in invalid_pieces_2 or surrounding_placed_pieces[3] in invalid_pieces_7:
             actions.remove("VE") if "VE" in actions else None
             actions.remove("VC") if "VC" in actions else None
-        elif col == self.size - 1:
+        elif col == self.size - 1 or surrounding_placed_pieces[3] in invalid_pieces_3 or surrounding_placed_pieces[2] in invalid_pieces_6:
             actions.remove("VB") if "VB" in actions else None
             actions.remove("VD") if "VD" in actions else None
-
-        if surrounding_placed_pieces[0] in ["FC", "FE", "FD", "BC", "VC", "VD", "LH"]:
-            actions.remove("VC") if "VC" in actions else None
-            actions.remove("VD") if "VD" in actions else None
-        if surrounding_placed_pieces[1] in ["FB", "FE", "FD", "BB", "VB", "VE", "LH"]:
-            actions.remove("VB") if "VB" in actions else None
-            actions.remove("VE") if "VE" in actions else None
-        if surrounding_placed_pieces[2] in ["FC", "FB", "FE", "BE", "VC", "VE", "LV"]:
-            actions.remove("VE") if "VE" in actions else None
-            actions.remove("VC") if "VC" in actions else None
-        if surrounding_placed_pieces[3] in ["FC", "FB", "FD", "BD", "VB", "VD", "LV"]:
-            actions.remove("VD") if "VD" in actions else None
-            actions.remove("VB") if "VB" in actions else None
-
-        if surrounding_placed_pieces[0] in ["FB", "BB", "BE", "BD", "VB", "VE", "LV"]:
-            actions.remove("VB") if "VB" in actions else None
-            actions.remove("VE") if "VE" in actions else None
-        if surrounding_placed_pieces[1] in ["FC", "BC", "BE", "BD", "VC", "VD", "LV"]:
-            actions.remove("VC") if "VC" in actions else None
-            actions.remove("VD") if "VD" in actions else None
-        if surrounding_placed_pieces[2] in ["FD", "BC", "BB", "BD", "VB", "VD", "LH"]:
-            actions.remove("VD") if "VD" in actions else None
-            actions.remove("VB") if "VB" in actions else None
-        if surrounding_placed_pieces[3] in ["FE", "BC", "BB", "BE", "VC", "VE", "LH"]:
-            actions.remove("VE") if "VE" in actions else None
-            actions.remove("VC") if "VC" in actions else None
 
         return tuple(actions)
 
