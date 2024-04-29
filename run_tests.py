@@ -33,10 +33,12 @@ def run_test(input_file, expected_output_file):
             file.write(expected_output + '\n')
             file.write('Actual output:\n')
             file.write(result.stdout.decode() + '\n')
+    else:
+        print(f'No difference found for {input_file}')
 
 
 # Get a list of all input files in the directory
-input_files = glob.glob('test_1-9/test*.txt')
+input_files = glob.glob('tests-pipe-10x10-50x50/test*.txt')
 
 for input_file in input_files:
     # Construct the name of the corresponding output file
