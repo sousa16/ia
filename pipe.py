@@ -5,6 +5,7 @@
 # Grupo 21:
 # 99991 João Sousa
 
+import pdb
 import sys
 from search import (
     Problem,
@@ -24,6 +25,14 @@ connection = {
     "down": {"FB", "BB", "BE", "BD", "VB", "VE", "LV"},
     "left": {"FE", "BC", "BB", "BE", "VC", "VE", "LH"},
     "right": {"FD", "BC", "BB", "BD", "VB", "VD", "LH"}
+}
+
+
+closing_connection = {
+    "up": {"BC", "BE", "BD", "VC", "VD", "LV"},
+    "down": {"BB", "BE", "BD", "VB", "VE", "LV"},
+    "left": {"BC", "BB", "BE", "VC", "VE", "LH"},
+    "right": {"BC", "BB", "BD", "VB", "VD", "LH"}
 }
 
 no_connection = {
@@ -174,7 +183,12 @@ class Board:
 
     def get_next_cell(self):
         """Devolve a próxima célula a preencher."""
-        return self.remaining_cells[0]
+        try:
+            return self.remaining_cells[0]
+        except IndexError:
+            # This will pause the execution and start the debugger when an exception occurs
+            pdb.set_trace()
+        # return self.remaining_cells[0]
 
     def get_possibilities_for_cell(self, row, col):
         """Devolve as possibilidades para a célula especificada."""
@@ -239,13 +253,13 @@ class Board:
         """Devolve as ações possíveis para uma peça de fecho."""
 
         # Check for surrounding pieces that have a connection
-        if surrounding_placed_pieces[0] in connection["down"]:
+        if surrounding_placed_pieces[0] in closing_connection["down"]:
             return ("FC",)
-        if surrounding_placed_pieces[1] in connection["up"]:
+        if surrounding_placed_pieces[1] in closing_connection["up"]:
             return ("FB",)
-        if surrounding_placed_pieces[2] in connection["right"]:
+        if surrounding_placed_pieces[2] in closing_connection["right"]:
             return ("FE",)
-        if surrounding_placed_pieces[3] in connection["left"]:
+        if surrounding_placed_pieces[3] in closing_connection["left"]:
             return ("FD",)
 
         actions = ["FC", "FB", "FE", "FD"]

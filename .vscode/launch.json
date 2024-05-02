@@ -9,7 +9,7 @@
             "console": "integratedTerminal",
             "args": [
                 "<",
-                "tests-pipe-10x10-50x50/test-15x15.txt"
+                "test_10x10-50x50/test-15x15.txt"
             ]
         }
     ]
