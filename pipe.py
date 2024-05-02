@@ -16,6 +16,23 @@ from search import (
     recursive_best_first_search,
 )
 
+pieces = {"FC", "FB", "FE", "FD", "BC", "BB", "BE",
+          "BD", "VC", "VB", "VE", "VD", "LV", "LH"}
+
+connection = {
+    "up": {"FC", "BC", "BE", "BD", "VC", "VD", "LV"},
+    "down": {"FB", "BB", "BE", "BD", "VB", "VE", "LV"},
+    "left": {"FE", "BC", "BB", "BE", "VC", "VE", "LH"},
+    "right": {"FD", "BC", "BB", "BD", "VB", "VD", "LH"}
+}
+
+no_connection = {
+    "up": {piece for piece in pieces if piece not in connection["up"]},
+    "down": {piece for piece in pieces if piece not in connection["down"]},
+    "left": {piece for piece in pieces if piece not in connection["left"]},
+    "right": {piece for piece in pieces if piece not in connection["right"]}
+}
+
 
 class PipeManiaState:
     state_id = 0
@@ -113,13 +130,16 @@ class Board:
             new_board.possible_values[cell[0]][cell[1]]))
 
         """
+        if partitioned:
+            state.board.invalid = True
+        """
+        """
         print("Placed piece", piece, "at", row, col)
-        # print("Remaining cells:", new_board.remaining_cells)
+        print("Remaining cells:", new_board.remaining_cells)
         print("Placed cells:", new_board.placed_cells)
         print("Possible values for cell:", new_board.possible_values[row][col])
         print("-------------------------------------------------")
         """
-
         return new_board
 
     def calculate_next_possible_pieces(self, row: int, col: int):
@@ -181,6 +201,23 @@ class Board:
 
         return surrounding_placed_pieces
 
+    def get_adjacent_connected(self, row, col):
+        """Devolve as células adjacentes conectadas."""
+        connected = []
+        piece = self.get_value(row, col)
+
+        if row != 0 and piece in connection["up"]:
+            connected.append((row - 1, col))
+        if row != self.size - 1 and piece in connection["down"]:
+            connected.append((row + 1, col))
+
+        if col != 0 and piece in connection["left"]:
+            connected.append((row, col - 1))
+        if col != self.size - 1 and piece in connection["right"]:
+            connected.append((row, col + 1))
+
+        return connected
+
     def __repr__(self):
         return "\n".join(map(lambda x: "\t".join(map(str, x)), self.cells))
 
@@ -201,36 +238,26 @@ class Board:
     def actions_for_closing_piece(self, row, col, surrounding_placed_pieces):
         """Devolve as ações possíveis para uma peça de fecho."""
 
-        invalid_pieces_0 = {"BB", "BE", "BD", "VB", "VE", "LV"}
-        invalid_pieces_1 = {"BC", "BE", "BD", "VC", "VD", "LV"}
-        invalid_pieces_2 = {"BC", "BB", "BD", "VB", "VD", "LH"}
-        invalid_pieces_3 = {"BC", "BB", "BE", "VC", "VE", "LH"}
-
         # Check for surrounding pieces that have a connection
-        if surrounding_placed_pieces[0] in invalid_pieces_0:
+        if surrounding_placed_pieces[0] in connection["down"]:
             return ("FC",)
-        if surrounding_placed_pieces[1] in invalid_pieces_1:
+        if surrounding_placed_pieces[1] in connection["up"]:
             return ("FB",)
-        if surrounding_placed_pieces[2] in invalid_pieces_2:
+        if surrounding_placed_pieces[2] in connection["right"]:
             return ("FE",)
-        if surrounding_placed_pieces[3] in invalid_pieces_3:
+        if surrounding_placed_pieces[3] in connection["left"]:
             return ("FD",)
 
         actions = ["FC", "FB", "FE", "FD"]
 
-        invalid_pieces_4 = {"FC", "FB", "FE", "FD", "BC", "VC", "VD", "LH"}
-        invalid_pieces_5 = {"FC", "FB", "FE", "FD", "BB", "VB", "VE", "LH"}
-        invalid_pieces_6 = {"FC", "FB", "FE", "FD", "BE", "VC", "VE", "LV"}
-        invalid_pieces_7 = {"FC", "FB", "FE", "FD", "BD", "VB", "VD", "LV"}
-
         # Check for surrounding pieces that don't have a connection
-        if row == 0 or surrounding_placed_pieces[0] in invalid_pieces_4:
+        if row == 0 or surrounding_placed_pieces[0] in no_connection["down"]:
             actions.remove("FC")
-        if row == self.size - 1 or surrounding_placed_pieces[1] in invalid_pieces_5:
+        if row == self.size - 1 or surrounding_placed_pieces[1] in no_connection["up"]:
             actions.remove("FB")
-        if col == 0 or surrounding_placed_pieces[2] in invalid_pieces_6:
+        if col == 0 or surrounding_placed_pieces[2] in no_connection["right"]:
             actions.remove("FE")
-        if col == self.size - 1 or surrounding_placed_pieces[3] in invalid_pieces_7:
+        if col == self.size - 1 or surrounding_placed_pieces[3] in no_connection["left"]:
             actions.remove("FD")
 
         return tuple(actions)
@@ -239,25 +266,25 @@ class Board:
         """Devolve as ações possíveis para uma peça de bifurcação."""
 
         # Check for surrounding pieces that don't have a connection
-        if row == 0 or surrounding_placed_pieces[0] in {"FC", "FE", "FD", "BC", "VC", "VD", "LH"}:
+        if row == 0 or surrounding_placed_pieces[0] in no_connection["down"]:
             return ("BB",)
-        if row == self.size - 1 or surrounding_placed_pieces[1] in {"FB", "FE", "FD", "BB", "VB", "VE", "LH"}:
+        if row == self.size - 1 or surrounding_placed_pieces[1] in no_connection["up"]:
             return ("BC",)
-        if col == 0 or surrounding_placed_pieces[2] in {"FC", "FB", "FE", "BE", "VC", "VE", "LV"}:
+        if col == 0 or surrounding_placed_pieces[2] in no_connection["right"]:
             return ("BD",)
-        if col == self.size - 1 or surrounding_placed_pieces[3] in {"FC", "FB", "FD", "BD", "VB", "VD", "LV"}:
+        if col == self.size - 1 or surrounding_placed_pieces[3] in no_connection["left"]:
             return ("BE",)
 
         actions = ["BC", "BB", "BE", "BD"]
 
         # Check for surrounding pieces that have a connection
-        if surrounding_placed_pieces[0] in {"FB", "BB", "BE", "BD", "VB", "VE", "LV"}:
+        if surrounding_placed_pieces[0] in connection["down"]:
             actions.remove("BB")
-        if surrounding_placed_pieces[1] in {"FC", "BC", "BE", "BD", "VC", "VD", "LV"}:
+        if surrounding_placed_pieces[1] in connection["up"]:
             actions.remove("BC")
-        if surrounding_placed_pieces[2] in {"FD", "BC", "BB", "BD", "VB", "VD", "LH"}:
+        if surrounding_placed_pieces[2] in connection["right"]:
             actions.remove("BD")
-        if surrounding_placed_pieces[3] in {"FE", "BC", "BB", "BE", "VC", "VE", "LH"}:
+        if surrounding_placed_pieces[3] in connection["left"]:
             actions.remove("BE")
 
         return tuple(actions)
@@ -266,28 +293,18 @@ class Board:
         """Devolve as ações possíveis para uma peça de canto."""
         actions = ["VC", "VB", "VE", "VD"]
 
-        invalid_pieces_0 = {"FC", "FE", "FD", "BC", "VC", "VD", "LH"}
-        invalid_pieces_1 = {"FB", "FE", "FD", "BB", "VB", "VE", "LH"}
-        invalid_pieces_2 = {"FC", "FB", "FE", "BE", "VC", "VE", "LV"}
-        invalid_pieces_3 = {"FC", "FB", "FD", "BD", "VB", "VD", "LV"}
-
-        invalid_pieces_4 = {"FB", "BB", "BE", "BD", "VB", "VE", "LV"}
-        invalid_pieces_5 = {"FC", "BC", "BE", "BD", "VC", "VD", "LV"}
-        invalid_pieces_6 = {"FD", "BC", "BB", "BD", "VB", "VD", "LH"}
-        invalid_pieces_7 = {"FE", "BC", "BB", "BE", "VC", "VE", "LH"}
-
-        if row == 0 or surrounding_placed_pieces[0] in invalid_pieces_0 or surrounding_placed_pieces[1] in invalid_pieces_5:
+        if row == 0 or surrounding_placed_pieces[0] in no_connection["down"] or surrounding_placed_pieces[1] in connection["up"]:
             actions.remove("VC") if "VC" in actions else None
             actions.remove("VD") if "VD" in actions else None
-        if row == self.size - 1 or surrounding_placed_pieces[1] in invalid_pieces_1 or surrounding_placed_pieces[0] in invalid_pieces_4:
+        if row == self.size - 1 or surrounding_placed_pieces[1] in no_connection["up"] or surrounding_placed_pieces[0] in connection["down"]:
             actions.remove("VB") if "VB" in actions else None
             actions.remove("VE") if "VE" in actions else None
 
-        if col == 0 or surrounding_placed_pieces[2] in invalid_pieces_2 or surrounding_placed_pieces[3] in invalid_pieces_7:
+        if col == 0 or surrounding_placed_pieces[2] in no_connection["right"] or surrounding_placed_pieces[3] in connection["left"]:
             actions.remove("VE") if "VE" in actions else None
             actions.remove("VC") if "VC" in actions else None
 
-        if col == self.size - 1 or surrounding_placed_pieces[3] in invalid_pieces_3 or surrounding_placed_pieces[2] in invalid_pieces_6:
+        if col == self.size - 1 or surrounding_placed_pieces[3] in no_connection["left"] or surrounding_placed_pieces[2] in connection["right"]:
             actions.remove("VB") if "VB" in actions else None
             actions.remove("VD") if "VD" in actions else None
 
@@ -297,12 +314,10 @@ class Board:
         """Devolve as ações possíveis para uma peça reta."""
         actions = ["LV", "LH"]
 
-        if row == 0 or row == self.size - 1 or surrounding_placed_pieces[2] in {
-                "FD", "BC", "BB", "BD", "VB", "VD", "LH"} or surrounding_placed_pieces[3] in {"FE", "BC", "BB", "BE", "VC", "VE", "LH"} or surrounding_placed_pieces[0] in {"FC", "FE", "FD", "BC", "VC", "VD", "LH"} or surrounding_placed_pieces[1] in {"FB", "FE", "FD", "BB", "VB", "VE", "LH"}:
+        if row == 0 or row == self.size - 1 or surrounding_placed_pieces[0] in no_connection["down"] or surrounding_placed_pieces[1] in no_connection["up"] or surrounding_placed_pieces[2] in connection["right"] or surrounding_placed_pieces[3] in connection["left"]:
             actions.remove("LV")
 
-        if col == 0 or col == self.size - 1 or surrounding_placed_pieces[0] in {
-                "FB", "BB", "BE", "BD", "VB", "VE", "LV"} or surrounding_placed_pieces[1] in {"FC", "BC", "BE", "BD", "VC", "VD", "LV"} or surrounding_placed_pieces[2] in {"FC", "FB", "FE", "BE", "VC", "VE", "LV"} or surrounding_placed_pieces[3] in {"FC", "FB", "FD", "BD", "VB", "VD", "LV"}:
+        if col == 0 or col == self.size - 1 or surrounding_placed_pieces[0] in connection["down"] or surrounding_placed_pieces[1] in connection["up"] or surrounding_placed_pieces[2] in no_connection["right"] or surrounding_placed_pieces[3] in no_connection["left"]:
             actions.remove("LH")
 
         return tuple(actions)
@@ -320,6 +335,17 @@ class Board:
             return self.actions_for_corner_piece(row, col, surrounding_placed_pieces)
         else:
             return self.actions_for_straight_piece(row, col, surrounding_placed_pieces)
+
+    def is_connected(self):
+        # Union-find algorithm - implement
+        visited = [[False for _ in range(self.size)] for _ in range(self.size)]
+        stack = [(0, 0)]
+        while len(stack) != 0:
+            (row, col) = stack.pop()
+            if not visited[row][col]:
+                visited[row][col] = True
+                stack.extend(self.get_adjacent_connected(row, col))
+        return all(all(row) for row in visited)
 
 
 class PipeMania(Problem):
@@ -352,7 +378,7 @@ class PipeMania(Problem):
         """Retorna True se e só se o estado passado como argumento é
         um estado objetivo. Deve verificar se todas as posições do tabuleiro
         estão preenchidas de acordo com as regras do problema."""
-        return state.board.get_remaining_cells_count() == 0
+        return state.board.get_remaining_cells_count() == 0 and state.board.is_connected()
 
     def h(self, node: Node):
         """Função heuristica utilizada para a procura A*."""
