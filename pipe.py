@@ -184,7 +184,8 @@ class Board:
     def get_next_cell(self):
         """Devolve a próxima célula a preencher."""
         try:
-            return self.remaining_cells[0]
+            if (self.remaining_cells):
+                return self.remaining_cells[0]
         except IndexError:
             # This will pause the execution and start the debugger when an exception occurs
             pdb.set_trace()
@@ -372,12 +373,13 @@ class PipeMania(Problem):
     def actions(self, state: PipeManiaState):
         """Retorna uma lista de ações que podem ser executadas a
         partir do estado passado como argumento."""
-        if state.board.invalid:
+        if state.board.invalid or not state.board.get_next_cell():
             return []
 
         row, col = state.board.get_next_cell()
 
         possibilities = state.board.get_possibilities_for_cell(row, col)
+
         return map(lambda piece: (row, col, piece), possibilities)
 
     def result(self, state: PipeManiaState, action):
