@@ -1,0 +1,11 @@
+[ Top 10 ]
+/home/sousa/projects/ia/pipe.py:38: size=186 KiB, count=1984, average=96 B
+/home/sousa/projects/ia/pipe.py:153: size=25.5 KiB, count=707, average=37 B
+/home/sousa/projects/ia/pipe.py:92: size=25.4 KiB, count=402, average=65 B
+/home/sousa/projects/ia/pipe.py:229: size=23.8 KiB, count=420, average=58 B
+/home/sousa/projects/ia/pipe.py:363: size=19.8 KiB, count=317, average=64 B
+/home/sousa/projects/ia/search.py:102: size=10152 B, count=131, average=77 B
+/home/sousa/projects/ia/pipe.py:82: size=6784 B, count=106, average=64 B
+/home/sousa/projects/ia/pipe.py:84: size=3840 B, count=20, average=192 B
+/home/sousa/projects/ia/pipe.py:284: size=3024 B, count=42, average=72 B
+/home/sousa/projects/ia/pipe.py:122: size=2784 B, count=39, average=71 B

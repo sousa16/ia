@@ -2,6 +2,8 @@
 # 99991 João Sousa
 
 import sys
+import tracemalloc
+from pympler import summary, muppy
 from search import (
     Problem,
     Node,
@@ -12,30 +14,28 @@ from search import (
     recursive_best_first_search,
 )
 
-pieces = {"FC", "FB", "FE", "FD", "BC", "BB", "BE",
-          "BD", "VC", "VB", "VE", "VD", "LV", "LH"}
+tracemalloc.start()
+
+pieces = ("FC", "FB", "FE", "FD", "BC", "BB", "BE",
+          "BD", "VC", "VB", "VE", "VD", "LV", "LH")
 
 connection = {
-    "up": {"FC", "BC", "BE", "BD", "VC", "VD", "LV"},
-    "down": {"FB", "BB", "BE", "BD", "VB", "VE", "LV"},
-    "left": {"FE", "BC", "BB", "BE", "VC", "VE", "LH"},
-    "right": {"FD", "BC", "BB", "BD", "VB", "VD", "LH"}
+    "up": ("FC", "BC", "BE", "BD", "VC", "VD", "LV"),
+    "down": ("FB", "BB", "BE", "BD", "VB", "VE", "LV"),
+    "left": ("FE", "BC", "BB", "BE", "VC", "VE", "LH"),
+    "right": ("FD", "BC", "BB", "BD", "VB", "VD", "LH")
 }
-
 
 closing_connection = {
-    "up": {"BC", "BE", "BD", "VC", "VD", "LV"},
-    "down": {"BB", "BE", "BD", "VB", "VE", "LV"},
-    "left": {"BC", "BB", "BE", "VC", "VE", "LH"},
-    "right": {"BC", "BB", "BD", "VB", "VD", "LH"}
+    "up": ("BC", "BE", "BD", "VC", "VD", "LV"),
+    "down": ("BB", "BE", "BD", "VB", "VE", "LV"),
+    "left": ("BC", "BB", "BE", "VC", "VE", "LH"),
+    "right": ("BC", "BB", "BD", "VB", "VD", "LH")
 }
 
-no_connection = {
-    "up": {piece for piece in pieces if piece not in connection["up"]},
-    "down": {piece for piece in pieces if piece not in connection["down"]},
-    "left": {piece for piece in pieces if piece not in connection["left"]},
-    "right": {piece for piece in pieces if piece not in connection["right"]}
-}
+
+def no_connection(direction):
+    return tuple(piece for piece in pieces if piece not in connection[direction])
 
 
 class PipeManiaState:
@@ -116,13 +116,13 @@ class Board:
         respectivamente."""
         return self.get_value(row, col - 1), self.get_value(row, col + 1)
 
-    def place_piece(self, row: int, col: int, piece: str):
-        """Coloca a peça na posição especificada e devolve um novo tabuleiro."""
-
+    def place_piece(self, row: int, col: int, piece) -> 'Board':
+        """Place a piece on the board at the specified position."""
         new_row = self.cells[row][:col] + (piece,) + self.cells[row][col + 1:]
         new_cells = self.cells[:row] + (new_row,) + self.cells[row + 1:]
         new_board = Board(new_cells)
 
+        # Update other attributes
         new_board.remaining_cells = self.remaining_cells[1:]
         new_board.possible_values = self.possible_values
         new_board.calculate_next_possible_pieces(row, col)
@@ -229,6 +229,8 @@ class Board:
             > from sys import stdin
             > line = stdin.readline().split()
         """
+
+        # Read data from stdin and convert it into a NumPy array
         cells = [tuple(line.strip("\n").split('\t')) for line in sys.stdin]
         return Board(tuple(cells)).calculate_state()
 
@@ -248,13 +250,13 @@ class Board:
         actions = ["FC", "FB", "FE", "FD"]
 
         # Check for surrounding pieces that don't have a connection
-        if row == 0 or surrounding_placed_pieces[0] in no_connection["down"]:
+        if row == 0 or surrounding_placed_pieces[0] in no_connection("down"):
             actions.remove("FC")
-        if row == self.size - 1 or surrounding_placed_pieces[1] in no_connection["up"]:
+        if row == self.size - 1 or surrounding_placed_pieces[1] in no_connection("up"):
             actions.remove("FB")
-        if col == 0 or surrounding_placed_pieces[2] in no_connection["right"]:
+        if col == 0 or surrounding_placed_pieces[2] in no_connection("right"):
             actions.remove("FE")
-        if col == self.size - 1 or surrounding_placed_pieces[3] in no_connection["left"]:
+        if col == self.size - 1 or surrounding_placed_pieces[3] in no_connection("left"):
             actions.remove("FD")
 
         return tuple(actions)
@@ -263,13 +265,13 @@ class Board:
         """Devolve as ações possíveis para uma peça de bifurcação."""
 
         # Check for surrounding pieces that don't have a connection
-        if row == 0 or surrounding_placed_pieces[0] in no_connection["down"]:
+        if row == 0 or surrounding_placed_pieces[0] in no_connection("down"):
             return ("BB",)
-        if row == self.size - 1 or surrounding_placed_pieces[1] in no_connection["up"]:
+        if row == self.size - 1 or surrounding_placed_pieces[1] in no_connection("up"):
             return ("BC",)
-        if col == 0 or surrounding_placed_pieces[2] in no_connection["right"]:
+        if col == 0 or surrounding_placed_pieces[2] in no_connection("right"):
             return ("BD",)
-        if col == self.size - 1 or surrounding_placed_pieces[3] in no_connection["left"]:
+        if col == self.size - 1 or surrounding_placed_pieces[3] in no_connection("left"):
             return ("BE",)
 
         actions = ["BC", "BB", "BE", "BD"]
@@ -290,18 +292,18 @@ class Board:
         """Devolve as ações possíveis para uma peça de canto."""
         actions = ["VC", "VB", "VE", "VD"]
 
-        if row == 0 or surrounding_placed_pieces[0] in no_connection["down"] or surrounding_placed_pieces[1] in connection["up"]:
+        if row == 0 or surrounding_placed_pieces[0] in no_connection("down") or surrounding_placed_pieces[1] in connection["up"]:
             actions.remove("VC") if "VC" in actions else None
             actions.remove("VD") if "VD" in actions else None
-        if row == self.size - 1 or surrounding_placed_pieces[1] in no_connection["up"] or surrounding_placed_pieces[0] in connection["down"]:
+        if row == self.size - 1 or surrounding_placed_pieces[1] in no_connection("up") or surrounding_placed_pieces[0] in connection["down"]:
             actions.remove("VB") if "VB" in actions else None
             actions.remove("VE") if "VE" in actions else None
 
-        if col == 0 or surrounding_placed_pieces[2] in no_connection["right"] or surrounding_placed_pieces[3] in connection["left"]:
+        if col == 0 or surrounding_placed_pieces[2] in no_connection("right") or surrounding_placed_pieces[3] in connection["left"]:
             actions.remove("VE") if "VE" in actions else None
             actions.remove("VC") if "VC" in actions else None
 
-        if col == self.size - 1 or surrounding_placed_pieces[3] in no_connection["left"] or surrounding_placed_pieces[2] in connection["right"]:
+        if col == self.size - 1 or surrounding_placed_pieces[3] in no_connection("left") or surrounding_placed_pieces[2] in connection["right"]:
             actions.remove("VB") if "VB" in actions else None
             actions.remove("VD") if "VD" in actions else None
 
@@ -311,10 +313,10 @@ class Board:
         """Devolve as ações possíveis para uma peça reta."""
         actions = ["LV", "LH"]
 
-        if row == 0 or row == self.size - 1 or surrounding_placed_pieces[0] in no_connection["down"] or surrounding_placed_pieces[1] in no_connection["up"] or surrounding_placed_pieces[2] in connection["right"] or surrounding_placed_pieces[3] in connection["left"]:
+        if row == 0 or row == self.size - 1 or surrounding_placed_pieces[0] in no_connection("down") or surrounding_placed_pieces[1] in no_connection("up") or surrounding_placed_pieces[2] in connection["right"] or surrounding_placed_pieces[3] in connection["left"]:
             actions.remove("LV")
 
-        if col == 0 or col == self.size - 1 or surrounding_placed_pieces[0] in connection["down"] or surrounding_placed_pieces[1] in connection["up"] or surrounding_placed_pieces[2] in no_connection["right"] or surrounding_placed_pieces[3] in no_connection["left"]:
+        if col == 0 or col == self.size - 1 or surrounding_placed_pieces[0] in connection["down"] or surrounding_placed_pieces[1] in connection["up"] or surrounding_placed_pieces[2] in no_connection("right") or surrounding_placed_pieces[3] in no_connection("left"):
             actions.remove("LH")
 
         return tuple(actions)
@@ -389,3 +391,14 @@ if __name__ == "__main__":
     pipemania = PipeMania(board)
     goal_node = depth_first_tree_search(pipemania)
     print(goal_node.state.board)
+
+    # all_objects = muppy.get_objects()
+    # sum1 = summary.summarize(all_objects)
+    # summary.print_(sum1)
+
+    """snapshot = tracemalloc.take_snapshot()
+    top_stats = snapshot.statistics('lineno')
+
+    print("[ Top 10 ]")
+    for stat in top_stats[:10]:
+        print(stat)"""
