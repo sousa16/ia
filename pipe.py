@@ -1,11 +1,6 @@
-# pipe.py: Template para implementação do projeto de Inteligência Artificial 2023/2024.
-# Devem alterar as classes e funções neste ficheiro de acordo com as instruções do enunciado.
-# Além das funções e classes sugeridas, podem acrescentar outras que considerem pertinentes.
-
 # Grupo 44:
 # 99991 João Sousa
 
-import pdb
 import sys
 from search import (
     Problem,
@@ -136,38 +131,37 @@ class Board:
         new_board.remaining_cells.sort(key=lambda cell: len(
             new_board.possible_values[cell[0]][cell[1]]))
 
-        """
-        if partitioned:
-            state.board.invalid = True
-        """
-
         return new_board
 
     def calculate_next_possible_pieces(self, row: int, col: int):
         """Calcula as possibilidades para a posição que foi alterada.
         Atualiza a linha e coluna afetadas."""
 
-        # Recalculate for affected row and column
-        new_possible_values = ()
-        for r in range(self.size):
-            row_possibilities = ()
-            for c in range(self.size):
-                old_possibilities = self.get_possibilities_for_cell(r, c)
-                if (r != row and c != col) or len(old_possibilities) == 0:
-                    row_possibilities += (old_possibilities,)
-                    continue
+        # Define the coordinates of the adjacent cells
+        adjacent_cells = [(row - 1, col), (row + 1, col),
+                          (row, col - 1), (row, col + 1)]
 
-                possibilities = tuple(self.actions_for_cell(r, c))
+        # Initialize new_possible_values as a copy of the current possible_values
+        new_possible_values = list(map(list, self.possible_values))
 
-                if (r != row or c != col) and len(possibilities) == 0:
-                    self.invalid = True
-                    return
+        for r, c in adjacent_cells:
+            # Skip cells that are out of bounds
+            if r < 0 or r >= self.size or c < 0 or c >= self.size:
+                continue
 
-                row_possibilities += (possibilities,)
+            old_possibilities = self.get_possibilities_for_cell(r, c)
+            if len(old_possibilities) == 0:
+                continue
 
-            new_possible_values += (row_possibilities,)
+            possibilities = tuple(self.actions_for_cell(r, c))
 
-        self.possible_values = new_possible_values
+            if len(possibilities) == 0:
+                self.invalid = True
+                return
+
+            new_possible_values[r][c] = possibilities
+
+        self.possible_values = tuple(map(tuple, new_possible_values))
 
     def get_remaining_cells_count(self):
         """Devolve o número de células que ainda não foram preenchidas."""
@@ -219,7 +213,7 @@ class Board:
         if col != self.size - 1 and piece in connection["right"]:
             connected.append((row, col + 1))
 
-        return connected
+        return [cell for cell in connected if cell not in self.remaining_cells]
 
     def __repr__(self):
         return "\n".join(map(lambda x: "\t".join(map(str, x)), self.cells))
