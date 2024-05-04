@@ -62,7 +62,6 @@ class Board:
         """Construtor da classe."""
         self.cells = cells
         self.remaining_cells = []
-        self.placed_cells = []
         self.size = len(cells)
         self.invalid = False
 
@@ -130,7 +129,6 @@ class Board:
         new_board = Board(new_cells)
 
         new_board.remaining_cells = self.remaining_cells[1:]
-        new_board.placed_cells = self.placed_cells + [(row, col)]
         new_board.possible_values = self.possible_values
         new_board.calculate_next_possible_pieces(row, col)
 
@@ -191,17 +189,18 @@ class Board:
         """top, bottom, left, right"""
         surrounding_placed_pieces = [None, None, None, None]
 
-        if row != 0 and (row - 1, col) in self.placed_cells:
-            surrounding_placed_pieces[0] = self.get_value(row - 1, col)
+        if self.remaining_cells:
+            if row != 0 and (row - 1, col) not in self.remaining_cells:
+                surrounding_placed_pieces[0] = self.get_value(row - 1, col)
 
-        if row != self.size - 1 and (row + 1, col) in self.placed_cells:
-            surrounding_placed_pieces[1] = self.get_value(row + 1, col)
+            if row != self.size - 1 and (row + 1, col) not in self.remaining_cells:
+                surrounding_placed_pieces[1] = self.get_value(row + 1, col)
 
-        if col != 0 and (row, col - 1) in self.placed_cells:
-            surrounding_placed_pieces[2] = self.get_value(row, col - 1)
+            if col != 0 and (row, col - 1) not in self.remaining_cells:
+                surrounding_placed_pieces[2] = self.get_value(row, col - 1)
 
-        if col != self.size - 1 and (row, col + 1) in self.placed_cells:
-            surrounding_placed_pieces[3] = self.get_value(row, col + 1)
+            if col != self.size - 1 and (row, col + 1) not in self.remaining_cells:
+                surrounding_placed_pieces[3] = self.get_value(row, col + 1)
 
         return surrounding_placed_pieces
 
