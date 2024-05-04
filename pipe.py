@@ -2,7 +2,7 @@
 # Devem alterar as classes e funções neste ficheiro de acordo com as instruções do enunciado.
 # Além das funções e classes sugeridas, podem acrescentar outras que considerem pertinentes.
 
-# Grupo 21:
+# Grupo 44:
 # 99991 João Sousa
 
 import pdb
@@ -142,13 +142,7 @@ class Board:
         if partitioned:
             state.board.invalid = True
         """
-        """
-        print("Placed piece", piece, "at", row, col)
-        print("Remaining cells:", new_board.remaining_cells)
-        print("Placed cells:", new_board.placed_cells)
-        print("Possible values for cell:", new_board.possible_values[row][col])
-        print("-------------------------------------------------")
-        """
+
         return new_board
 
     def calculate_next_possible_pieces(self, row: int, col: int):
@@ -183,13 +177,8 @@ class Board:
 
     def get_next_cell(self):
         """Devolve a próxima célula a preencher."""
-        try:
-            if (self.remaining_cells):
-                return self.remaining_cells[0]
-        except IndexError:
-            # This will pause the execution and start the debugger when an exception occurs
-            pdb.set_trace()
-        # return self.remaining_cells[0]
+        if (self.remaining_cells):
+            return self.remaining_cells[0]
 
     def get_possibilities_for_cell(self, row, col):
         """Devolve as possibilidades para a célula especificada."""
@@ -352,6 +341,7 @@ class Board:
             return self.actions_for_straight_piece(row, col, surrounding_placed_pieces)
 
     def is_connected(self):
+        """Verifica se o tabuleiro não tem partições."""
         # Union-find algorithm - implement
         visited = [[False for _ in range(self.size)] for _ in range(self.size)]
         stack = [(0, 0)]
@@ -398,16 +388,10 @@ class PipeMania(Problem):
 
     def h(self, node: Node):
         """Função heuristica utilizada para a procura A*."""
-        # TODO
         pass
 
 
 if __name__ == "__main__":
-    # TODO:
-    # Ler o ficheiro do standard input,
-    # Usar uma técnica de procura para resolver a instância,
-    # Retirar a solução a partir do nó resultante,
-    # Imprimir para o standard output no formato indicado.
     board = Board.parse_instance()
     pipemania = PipeMania(board)
     goal_node = depth_first_tree_search(pipemania)
