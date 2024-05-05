@@ -2,8 +2,6 @@
 # 99991 João Sousa
 
 import sys
-import tracemalloc
-from pympler import summary, muppy
 from search import (
     Problem,
     Node,
@@ -13,8 +11,6 @@ from search import (
     greedy_search,
     recursive_best_first_search,
 )
-
-tracemalloc.start()
 
 pieces = ("FC", "FB", "FE", "FD", "BC", "BB", "BE",
           "BD", "VC", "VB", "VE", "VD", "LV", "LH")
@@ -134,7 +130,7 @@ class Board:
         return new_board
 
     def calculate_next_possible_pieces(self, row: int, col: int):
-        """Calcula as possibilidades para a posição que foi alterada.
+        """Calcula as possibilidades para a posição que foi alterada.   
         Atualiza a linha e coluna afetadas."""
 
         # Define the coordinates of the adjacent cells
@@ -391,14 +387,3 @@ if __name__ == "__main__":
     pipemania = PipeMania(board)
     goal_node = depth_first_tree_search(pipemania)
     print(goal_node.state.board)
-
-    # all_objects = muppy.get_objects()
-    # sum1 = summary.summarize(all_objects)
-    # summary.print_(sum1)
-
-    """snapshot = tracemalloc.take_snapshot()
-    top_stats = snapshot.statistics('lineno')
-
-    print("[ Top 10 ]")
-    for stat in top_stats[:10]:
-        print(stat)"""
